@@ -1,7 +1,7 @@
 import os
 from flask import Flask, Response, request, url_for
 import plivoxml
-from utils import joke_from_reddit, conf
+#from utils import joke_from_reddit, conf
 import plivo
 
 # This file will be played when a caller presses 2.
@@ -15,6 +15,10 @@ greeting = "Welcome to the Prayer Line of Fellowship Mission Church. Please pres
 
 greeting2 =  "The Prayer Line will begin shortly."
 
+PLIVO_SONG = "https://s3.amazonaws.com/plivocloud/music.mp3"
+
+Our_song = "https://s3-us-west-2.amazonaws.com/music-queue/test34.wav"
+
 # This is the message that Plivo reads when the caller does nothing at all
 NO_INPUT_MESSAGE = "Please try again."
 
@@ -25,7 +29,7 @@ WRONG_INPUT_MESSAGE = "There is no option assigned to your selection. Please \
 app = Flask(__name__)
 
 
-@app.route('/response/ivr', methods=['GET', 'POST'])
+@app.route('/response/ivr', methods=['GET']) #, 'POST'])
 def ivr():
     response = plivoxml.Response()
     if request.method == 'GET':
@@ -65,64 +69,89 @@ def comment_out():
         return Response(str(response), mimetype='text/xml')
         """
 
+#14158911541
 
 @app.route('/response/main_menu', methods=['GET', 'POST'])
 def main_menu():
     response = plivoxml.Response()
-    sms('main menu.')
+    digit = request.form.get('Digits')
+    """
+    if digit == "1":
+        response.addSpeak(greeting2)
+    #sms('main menu.')
     if request.method == 'POST':
-        digit_pressed = request.values.get('Digits', None)
+        digit = request.values.get('Digits', None)
+    """
 
-        if digit_pressed == '1':
-            sms('prayer line.')
-            with response.dial() as d:
-              d.addConference('conference-1', muted=True)
-        if digit_pressed == '2':
-            sms('schedule.')
-            response.say("Our current seasonal focus is Sharing and Caring through Prayer. Our Worship \
-                service schedule is as follows: \
-                Sunday Worship service begins at 12 noon, \
-                with Sunday Prayer \
-                and Sunday School services beginning earlier in the day at 10:30 am. \
-                During the week, \
-                Prayer is held on Tuesday nights at 7:30pm and Bible Study begins at 7:30pm on \
-                Friday nights.", voice=v, action='/response/main_menu')
-        if digit_pressed == '3':
-            sms('directions.')
-            response.say("Our Congregation is centered between the historic Fort Hill neighborhood \
-                and directly behind Roxbury Community College. We are steps away from the Orange Line \
-                Roxbury Crossing T Station. Our direct address is 85 Centre Street, Roxbury, 02119. The \
-                spelling of 'Centre' street is 'C. E. N. T. R. E.'.", voice=v) #action='/response/main_menu'
-            response.pause(length = "2")
-            response.say("For more information, including directions, \
-                please visit fellowship mission church.org", voice=v) #action='/response/main_menu'
-        if digit_pressed == '4':
-            sms('nothing (4).')
-            response.pause(length='1')
-        
-        if digit_pressed == '5':
-            sms('spanish version.')
-            response.say(Espanol_G, voice='alice', language='es-MX')
+    if digit == '1':
+        #sms('prayer line.')
+        conference_name = "prayerLine"
+        #action_url = url_for(Our_song, _external=True)
+        response.addConference(conference_name, waitSound=PLIVO_SONG, muted="true")
+        #response.dial(conference_name)
+        response.play=("https://s3-us-west-2.amazonaws.com/music-queue/test34.wav")
+        #with response.dial() as d:
+        #  d.addConference('conference-1', muted=True)
+    if digit == '2':
+        #sms('schedule.')
+        response.say("Our current seasonal focus is Sharing and Caring through Prayer. Our Worship \
+            service schedule is as follows: \
+            Sunday Worship service begins at 12 noon, \
+            with Sunday Prayer \
+            and Sunday School services beginning earlier in the day at 10:30 am. \
+            During the week, \
+            Prayer is held on Tuesday nights at 7:30pm and Bible Study begins at 7:30pm on \
+            Friday nights.", voice=v, action='/response/main_menu')
+    if digit == '3':
+        #sms('directions.')
+        response.say("Our Congregation is centered between the historic Fort Hill neighborhood \
+            and directly behind Roxbury Community College. We are steps away from the Orange Line \
+            Roxbury Crossing T Station. Our direct address is 85 Centre Street, Roxbury, 02119. The \
+            spelling of 'Centre' street is 'C. E. N. T. R. E.'.", voice=v) #action='/response/main_menu'
+        response.pause(length = "2")
+        response.say("For more information, including directions, \
+            please visit fellowship mission church.org", voice=v) #action='/response/main_menu'
+    if digit == '4':
+        #sms('nothing (4).')
+        response.pause(length='1')
+    
+    if digit == '5':
+        #sms('spanish version.')
+        response.say(Espanol_G, voice='alice', language='es-MX')
 
-        if digit_pressed == '7':
-            sms('host prompt.')
-            with response.gather(numDigits=4, action='/response/conference_speaker') as g:
-                g.say('Prayer Coordinators, Please enter the code to host the conference.', voice=v)
+    if digit == '7':
+        #sms('host prompt.')
+        with response.gather(numDigits=4, action='/response/conference_speaker') as g:
+            g.say('Prayer Coordinators, Please enter the code to host the conference.', voice=v)
 
-        # TODO: handle the rest of the menu here:
+    # TODO: handle the rest of the menu here:
 
-        else:
-            with response.gather(numDigits=1, action='/response/') as g:
-                g.pause(length = "6")
-                g.say("Please press 9 to repeat these options.", voice=v)
-                g.pause(length = "13")
-                g.say("Thank you for calling the Prayer Line of Fellowship Mission \
-                    Church, May the Peace of the Lord be With you, and God Bless!", voice=v)
-            #response.say('Invalid choice')
-            # TODO: say main menu and gather responses again
+    else:
+        response.addSpeak("Please press 9 to repeat.")
+        """
+        with response.gather(numDigits=1, action='/response/') as g:
+            g.pause(length = "6")
+            g.say("Please press 9 to repeat these options.", voice=v)
+            g.pause(length = "13")
+            g.say("Thank you for calling the Prayer Line of Fellowship Mission \
+                Church, May the Peace of the Lord be With you, and God Bless!", voice=v)
+        #response.say('Invalid choice')
+        # TODO: say main menu and gather responses again
+        """
 
-    return Response(str(response), mimetype='text/xml')
+        return Response(str(response), mimetype='text/xml')
 
+"""
+    if request.method == 'GET':
+        response.addSpeak("GET")
+        print "get"
+""" 
+"""  
+    if request.method == 'POST':
+        response.addSpeak("POST")
+        print "post"
+        #user_input = request.form.get('Digits', '')
+"""    
 @app.route('/response/conference/', methods=['GET', 'POST'])
 def confe():
     response = plivoxml.Response()

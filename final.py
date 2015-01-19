@@ -9,6 +9,8 @@ from twilio.rest import TwilioRestClient
 # request url:  ... /response/
 # fallback url: ... /response/error_handler/
 
+#5084362463
+
 app = Flask(__name__)
 
 ACCOUNT_SID = settings.api_tok
@@ -23,19 +25,9 @@ Greeting = "Welcome to the Prayer Line of Fellowship Mission Church. Please pres
     seasonal worship service. Please press 3 for our location and directions\
     to our Congregation."
 
-S_schedule_S_focus = "Our current seasonal focus is 'Worship, Wisdom and Witnessing: Go and Tell Somebody!' \
-                Our Worship service schedule is as follows: \
-                Sunday Worship service begins at 12 noon, \
-                with Sunday Prayer \
-                and Sunday School services beginning earlier in the day at 10:30 am. \
-                During the week, \
-                Prayer is held on Tuesday nights at 7:30pm and Bible Study begins at 7:30pm on \
-                Friday nights."
+S_schedule_S_focus = "___"
 
-M_directions = "Our Congregation is centered between the historic Fort Hill neighborhood \
-                and directly behind Roxbury Community College. We are steps away from the Orange Line \
-                Roxbury Crossing T Station. Our direct address is 85 Centre Street, Roxbury, 02119. The \
-                spelling of 'Centre' Street is 'C. E. N. T. R. E.'."
+M_directions = "____"
 
 M_info = "For more information, including directions, \
                     please visit fellowship mission church.org"

@@ -12,23 +12,13 @@ VOICE='MAN'
 GREETING = "Welcome to the Prayer Line of Fellowship Mission Church. Please press 1 \
             to join the conference as a listener. Please press 2 for our \
             seasonal worship service. Please press 3 for our location and directions\
-            to our Congregation. Please press 7 to join the conference as a moderator."
+            to our Congregation." #Please press 7 to join as a Prayer Coordinator."
 
 GREETING2 =  "The Prayer Line will begin shortly."
 
-SCHEDULE = "Our current seasonal focus is Sharing and Caring through Prayer. Our Worship \
-                service schedule is as follows: \
-                Sunday Worship service begins at 12 noon, \
-                with Sunday Prayer \
-                and Sunday School services beginning earlier in the day at 10:30 am. \
-                During the week, \
-                Prayer is held on Tuesday nights at 7:30pm and Bible Study begins at 7:30pm on \
-                Friday nights."
+SCHEDULE = "___"
 
-LOCATION = "Our Congregation is centered between the historic Fort Hill neighborhood \
-                and directly behind Roxbury Community College. We are steps away from the Orange Line \
-                Roxbury Crossing T Station. Our direct address is 85 Centre Street, Roxbury, 02119. The \
-                spelling of 'Centre' street is 'C. E. N. T. R. E.'."
+LOCATION = "___"
 
 CONFERENCE_WAIT_SONG = "https://s3-us-west-2.amazonaws.com/music-queue/test34.wav"
 
@@ -54,7 +44,7 @@ app = Flask(__name__)
 #
 #     return Response(str(response), mimetype='text/xml')
 
-
+#Set this as the answer URL
 @app.route('/response/main_menu', methods=['GET', 'POST'])
 def main_menu():
     response = plivoxml.Response()

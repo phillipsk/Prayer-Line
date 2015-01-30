@@ -1,3 +1,6 @@
+import logging
+import logging.config
+import sys
 import os
 from flask import Flask, Response, request, url_for
 import plivoxml
@@ -46,17 +49,59 @@ SPEAKER_PIN = '8824'
 app = Flask(__name__)
 
 
-# @app.route('/response/ivr', methods=['POST']) #, 'POST'])
-# def ivr():
-#     response = plivoxml.Response()
-#     # GetDigit XML Docs - http://plivo.com/docs/xml/getdigits/
-#
-#
-#     return Response(str(response), mimetype='text/xml')
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'recording': {
+            'format': '[%(asctime)s]: %(message)s',
+        },
+        'verbose': {
+            'format': '%(levelname)s::%(asctime)s::%(module)s -- %(message)s',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose'
+        },
+        'recordings_file': {
+            'level': 'INFO',
+            'filename': 'recordings.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'recording'
+        },
+        'logfile': {
+            'level': 'DEBUG',
+            'filename': 'debug.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose'
+        }
+    },
 
+    'loggers': {
+        'recordings': {
+            'handlers': ['recordings_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'root': {
+            'handlers': ['logfile', 'console'],
+            'level': 'INFO',
+            'propagate': True
+        },
+    }
+})
+
+logger = logging.getLogger(__name__)
+recordings = logging.getLogger('recordings')
 
 @app.route('/response/main_menu', methods=['GET', 'POST'])
 def main_menu():
+    logger.debug('New call')
+    logger.debug('--')
     response = plivoxml.Response()
 
     if request.method == 'GET':
@@ -181,17 +226,17 @@ def conference_callback():
     values = request.form
     action = values.get('ConferenceAction')
 
-    print values
-
-    print 'Conference event:'
-    print '  action = %s (event = %s)' % (action, values.get('Event'))
+    # print values
+    #
+    # print 'Conference event:'
+    # print '  action = %s (event = %s)' % (action, values.get('Event'))
 
     # 'Event' and 'ConferenceRecordStop' are undocumented by Plivo
     if action == 'record' and values.get('Event') == 'ConferenceRecordStop':
         # You would start the download here (but not from this thread, because that may take
         #  too long and cause plivo to timeout.
         record_file = values.get('RecordFile')
-        print 'Conference recording has finished. Recording url: %s' % record_file
+        recordings.info('Conference recording has finished. Recording url: %s' % record_file)
 
     return Response()
 
@@ -200,8 +245,7 @@ def conference_callback():
 #  (e.g. sending the caller back to the main menu, maybe telling them that there was an error)
 @app.route('/response/error_handler/', methods=['POST'])
 def error_handler():
-    print 'Pilvo error:'
-    print '  ', request.values, request.data
+    logger.error('Pilvo error: %s , %s' % (request.values, request.data))
 
     response = plivoxml.Response()
     response.addRedirect(url_for('ivr', _external=True))
@@ -213,7 +257,7 @@ def error_handler():
 #  used for logging
 @app.route('/response/hangup_handler/', methods=['POST'])
 def hangup_handler():
-    print 'Call has been hung up'
+    # print 'Call has been hung up'
 
     return Response()
 
@@ -224,38 +268,3 @@ if __name__ == '__main__':
         app.debug = True
 
     app.run(host='0.0.0.0', port=port)
-
-
-# @app.route('/response/conference/', methods=['GET', 'POST'])
-# def confe():
-#     response = plivoxml.Response()
-#
-#
-#     if request.method == 'GET':  #use to be GET
-#         response.addSpeak(GREETING2)
-#         getdigits_action_url = url_for('conference', _external=True)
-#         getDigits = plivoxml.GetDigits(action=getdigits_action_url,
-#                                        method='POST', timeout=15, numDigits=4,
-#                                        retries=1, finishOnKey='#')
-#         getDigits.addSpeak('If you know your conference pin, please enter the pin followed by the # key.')
-#         response.add(getDigits)
-#         response.addSpeak(NO_INPUT_MESSAGE)
-#         return Response(str(response), mimetype='text/xml')
-#
-#     elif request.method == 'POST':
-#         digit = request.form.get('Digits')
-#
-#         if digit == "1989":
-#             # Fetch a random joke using the Reddit API.
-#             #joke = joke_from_reddit()
-#             #response.addSpeak(joke)
-#             start_conference = conf()
-#             response.start_conference(conf)
-#
-#         elif digit == "2":
-#             # Listen to a song
-#             response.addPlay(PLIVO_SONG)
-#         else:
-#             response.addSpeak(WRONG_INPUT_MESSAGE)
-#
-#         return Response(str(response), mimetype='text/xml')

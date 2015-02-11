@@ -7,9 +7,7 @@ import plivo
 import plivoxml
 import settings, greetings
 
-# Plivo API settings
-PLIVO_AUTH_ID = 'MAMMUXNJDMZMIWNDU4NJ'
-PLIVO_TOKEN = 'NGFhNjJlZTJhNTY3NjUzZTAzZjE0OTkzYWQ2ZTUz'
+
 
 # This file will be played when a caller presses 2.
 PLIVO_SONG = "https://s3.amazonaws.com/plivocloud/music.mp3"
@@ -39,16 +37,16 @@ WRONG_INPUT_MESSAGE = greetings.WRONG_INPUT_MESSAGE
 #############Begin Prayer Line Python code
 #
 # Each Prayer Line/Conference requires a title
-CONFERENCE_NAME = "PrayerLine"
+CONFERENCE_NAME = "Prayer_Line_01" #Inster date/time stamp ????
 
 # List of caller id's to notify admin when they join the conference as a speaker
-NOTIFY_ADMIN = ['sip:atleta150114102245@phone.plivo.com-no',]
+NOTIFY_ADMIN = ['16177721818','16178070291','13392366863']
 
 # Numbers used for sending SMS notification messages
-SMS_NOTIFICATION_NUMBER = '36202874989'
+SMS_NOTIFICATION_NUMBER = settings.to_number
 
 # NOTE: source can't be the same as the number above (or any number that we send the messages to)
-SMS_SOURCE_NUMBER = '36202874988'
+SMS_SOURCE_NUMBER = settings.from_number
 SMS_NOTIFICATION_TEMPLATE = 'A new spaker has joined the conference. Caller id: %s.'
 
 SPEAKER_PIN = settings.pin_number
@@ -210,7 +208,7 @@ def notify_admin(caller_number):
     if caller_number in NOTIFY_ADMIN:
         print "Sending notification message to %s" % SMS_NOTIFICATION_NUMBER
         # TODO: send sms
-        plivo_api = plivo.RestAPI(PLIVO_AUTH_ID, PLIVO_TOKEN)
+        plivo_api = plivo.RestAPI(settings.PLIVO_AUTH_ID, settings.PLIVO_TOKEN)
         response = plivo_api.send_message({'src': SMS_SOURCE_NUMBER,
                                            'dst': SMS_NOTIFICATION_NUMBER,
                                            'text': SMS_NOTIFICATION_TEMPLATE % caller_number})

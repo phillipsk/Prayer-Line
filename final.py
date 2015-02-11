@@ -44,7 +44,40 @@ exit_M = "Thank you for calling the Prayer Line of Fellowship Mission \
 
 error_M = 'Please try again. Please enter the code with or without the pound key.'
 
+############################################################
 
+Press_2_message = "Our current season, Bro Nyerrie please fill in here"
+
+Press_3_message = "Our Congregation, Bro Nyerrie please fill in here"
+
+S_schedule_S_focus = "Our current seasonal focus is 'Worship, Wisdom and Witnessing: Go and Tell Somebody!' \
+                Our Worship service schedule is as follows: \
+                Sunday Worship service begins at 12 noon, \
+                with Sunday Prayer \
+                and Sunday School services beginning earlier in the day at 10:30 am. \
+                During the week, \
+                Prayer is held on Tuesday nights at 7:30pm and Bible Study begins at 7:30pm on \
+                Friday nights."
+
+M_directions = "Our Congregation is centered between the historic Fort Hill neighborhood \
+                and directly behind Roxbury Community College. We are steps away from the Orange Line \
+                Roxbury Crossing T Station. Our direct address is 85 Centre Street, Roxbury, 02119. The \
+                spelling of 'Centre' Street is 'C. E. N. T. R. E.'."
+
+
+
+P_coord = 'Prayer Coordinators, Please enter the code to host the conference.'
+
+Espanol_G = "Bienvenido a la linea de oracion de la Iglesia Mision de Becas . Por favor, pulse 1 \
+    en cualquier momento para seguir la linea de oracion . Por favor, pulse 2 para nuestro \
+    servicio de adoracion de temporada . Por favor, pulse 3 para nuestra ubicacion y como llegar \
+    a nuestra Congregacion ."#.encode("utf-8")
+
+exit_M = "Thank you for calling the Prayer Line of Fellowship Mission \
+                    Church, May the Peace of the Lord be With you and God Bless!"
+
+error_M = 'Please try again. Please enter the code with or without the pound key.'
+###################################################################
 
 #MAIN_MENU = 'Press 1 to join conference as a speaker, 2 to join conference as a moderator'
 

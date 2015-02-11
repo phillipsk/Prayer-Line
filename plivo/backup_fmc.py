@@ -3,59 +3,53 @@ import logging.config
 import sys
 import os
 from flask import Flask, Response, request, url_for
-import plivo
 import plivoxml
-import settings, greetings
-
-# Plivo API settings
-PLIVO_AUTH_ID = 'MAMMUXNJDMZMIWNDU4NJ'
-PLIVO_TOKEN = 'NGFhNjJlZTJhNTY3NjUzZTAzZjE0OTkzYWQ2ZTUz'
 
 # This file will be played when a caller presses 2.
 PLIVO_SONG = "https://s3.amazonaws.com/plivocloud/music.mp3"
 
 # Voice used for speaking. MAN or WOMAN
-VOICE='alice'
+VOICE='MAN'
 
 # This is the message that Plivo reads when the caller dials in
-GREETING = greetings.welcome_greeting
+GREETING = "Welcome to the Prayer Line of Fellowship Mission Church. Please press 1 \
+            to join the conference as a listener. Please press 2 for our \
+            seasonal worship service. Please press 3 for our location and directions\
+            to our Congregation." #Please press 7 to join as a Prayer Coordinator."
 
-SCHEDULE = greetings.schedule_and_focus
+GREETING2 =  "The Prayer Line will begin shortly."
 
-LOCATION = greetings.directions_and_info
+SCHEDULE = "___"
 
-# Hold music
-CUSTOM_MUSIC = greetings.custom_hold_music
-DEFAULT_MUSIC = greetings.default_hold_music
+LOCATION = "___"
+
+CONFERENCE_WAIT_SONG = "https://s3-us-west-2.amazonaws.com/music-queue/test34.wav"
 
 # This is the message that Plivo reads when the caller does nothing at all
-NO_INPUT_MESSAGE = greetings.NO_INPUT_MESSAGE
+NO_INPUT_MESSAGE = "Please try again."
 
 # This is the message that Plivo reads when the caller inputs a wrong number.
-WRONG_INPUT_MESSAGE = greetings.WRONG_INPUT_MESSAGE
+WRONG_INPUT_MESSAGE = "There is no option assigned to your selection. Please \
+                        try again."
 
-########################### Taken from greeting.py END ###############
-#
-#############Begin Prayer Line Python code
-#
-# Each Prayer Line/Conference requires a title
 CONFERENCE_NAME = "PrayerLine"
 
-# List of caller id's to notify admin when they join the conference as a speaker
-NOTIFY_ADMIN = ['sip:atleta150114102245@phone.plivo.com-no',]
-
-# Numbers used for sending SMS notification messages
-SMS_NOTIFICATION_NUMBER = '36202874989'
-
-# NOTE: source can't be the same as the number above (or any number that we send the messages to)
-SMS_SOURCE_NUMBER = '36202874988'
-SMS_NOTIFICATION_TEMPLATE = 'A new spaker has joined the conference. Caller id: %s.'
-
-SPEAKER_PIN = settings.pin_number
-CONFERENCE_UNMUTE_SEQUENCE = '9'
+SPEAKER_PIN = '8824'
 
 app = Flask(__name__)
 
+
+<<<<<<< HEAD
+# @app.route('/response/ivr', methods=['POST']) #, 'POST'])
+# def ivr():
+#     response = plivoxml.Response()
+#     # GetDigit XML Docs - http://plivo.com/docs/xml/getdigits/
+#
+#
+#     return Response(str(response), mimetype='text/xml')
+
+#Set this as the answer URL
+=======
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -105,6 +99,7 @@ logging.config.dictConfig({
 logger = logging.getLogger(__name__)
 recordings = logging.getLogger('recordings')
 
+>>>>>>> 390a09475fec0509cd575954b7f372dd2b7595ab
 @app.route('/response/main_menu', methods=['GET', 'POST'])
 def main_menu():
     logger.debug('New call')
@@ -130,15 +125,15 @@ def main_menu():
             )
         if digit == '2':
             #sms('schedule.')
-            response.addSpeak(SCHEDULE)#, voice=VOICE)
+            response.addSpeak(SCHEDULE, voice=VOICE)
             response.addRedirect(url_for('main_menu', _external=True), method='GET')
         if digit == '3':
             #sms('directions.')
-            response.addSpeak(LOCATION)#, voice=VOICE)
+            response.addSpeak(LOCATION, voice=VOICE)
             # NOTE: plivo does not seem to support adding a pause. What you can do is playing
             #  an empty/muted sound file of the desired length
             response.addSpeak("For more information, including directions, \
-                please visit fellowship mission church.org")#, voice=VOICE)
+                please visit fellowship mission church.org", voice=VOICE)
             response.addRedirect(url_for('main_menu', _external=True), method='GET')
         if digit == '4':
             #sms('nothing (4).')
@@ -146,7 +141,7 @@ def main_menu():
 
         if digit == '5':
             #sms('spanish version.')
-            response.addSpeak("...", voice=VOICE, language='es-MX')
+            response.addSpeak("...", voice='alice', language='es-MX')
 
         if digit == '7':
             response.addRedirect(url_for('conference_speaker', _external=True), method='GET')
@@ -189,33 +184,15 @@ def repeat_menu():
 def conference_listener_wait():
     response = plivoxml.Response()
 
-    response.addPlay(DEFAULT_MUSIC)
+    response.addPlay(CONFERENCE_WAIT_SONG)
 
     return Response(str(response), mimetype='text/xml')
 
 def add_conference_pin_request(response, header_text):
     g = response.addGetDigits(numDigits=4, action=url_for('conference_speaker', _external=True))
-    g.addSpeak('%s Please enter the code to host the conference.' % header_text,voice=VOICE) ##VOICE variable
+    g.addSpeak('%s Please enter the code to host the conference.' % header_text,voice=VOICE)
 
     return response
-
-
-def notify_admin(caller_number):
-    """
-    Notify admin (via SMS) if needed that a speaker has joined the conference.
-
-    Admin is notified only if the number of the speaker (caller) is in the white list NOTIFY_ADMIN.
-    """
-    print "  Notify admin. Caller: ", caller_number, caller_number in NOTIFY_ADMIN
-    if caller_number in NOTIFY_ADMIN:
-        print "Sending notification message to %s" % SMS_NOTIFICATION_NUMBER
-        # TODO: send sms
-        plivo_api = plivo.RestAPI(PLIVO_AUTH_ID, PLIVO_TOKEN)
-        response = plivo_api.send_message({'src': SMS_SOURCE_NUMBER,
-                                           'dst': SMS_NOTIFICATION_NUMBER,
-                                           'text': SMS_NOTIFICATION_TEMPLATE % caller_number})
-        print "  response = ", response
-
 
 @app.route('/response/conference_speaker', methods=['GET', 'POST'])
 def conference_speaker():
@@ -233,9 +210,8 @@ def conference_speaker():
             response.addConference(
                 CONFERENCE_NAME, startConferenceOnEnter='true', muted='false', stayAlone='true',
                 record='true', callbackUrl=url_for('conference_callback', _external=True),
-                digitsMatch=CONFERENCE_UNMUTE_SEQUENCE, callbackMethod='POST'
+                callbackMethod='POST'
             )
-            notify_admin(request.form.get('From'))
         else:
             add_conference_pin_request(response, 'Please try again. ')
 
@@ -263,16 +239,6 @@ def conference_callback():
         #  too long and cause plivo to timeout.
         record_file = values.get('RecordFile')
         recordings.info('Conference recording has finished. Recording url: %s' % record_file)
-    elif action == 'digits':
-        conference_name = values.get('ConferenceName')
-        plivo_api = plivo.RestAPI(PLIVO_AUTH_ID, PLIVO_TOKEN)
-        conference = plivo_api.Conference.get(conference_name=conference_name)
-
-        # TODO: this should be run in a background/worker thread, because it can cause a timeout
-        #  if there are many (muted) members
-        for member in conference.members:
-            if member['muted']:
-                plivo_api.ConferenceMember.unmute(member['member_id'], conference_name)
 
     return Response()
 
@@ -282,7 +248,6 @@ def conference_callback():
 @app.route('/response/error_handler/', methods=['POST'])
 def error_handler():
     logger.error('Pilvo error: %s , %s' % (request.values, request.data))
-    print 'Pilvo error: %s , %s' % (request.values, request.data)
 
     response = plivoxml.Response()
     response.addRedirect(url_for('ivr', _external=True))

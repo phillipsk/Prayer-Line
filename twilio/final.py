@@ -60,43 +60,43 @@ error_M = 'Please try again. Please enter the code with or without the pound key
 def welcome():
     response = twilio.twiml.Response()
     # response.say(Greeting)
-    #sms()
+    sms()
 
     with response.gather(numDigits=1, action='/response/main_menu') as g:
         g.say(Greeting, voice=v)
-    #sms()
-    #sms('nothing (4).')
+    sms()
+    sms('nothing (4).')
     return Response(str(response), mimetype='text/xml')
 
 @app.route('/response/main_menu', methods=['GET', 'POST'])
 def main_menu():
     response = twilio.twiml.Response()
-    #sms('main menu.')
+    sms('main menu.')
     if request.method == 'POST':
         digit_pressed = request.values.get('Digits', None)
 
         if digit_pressed == '1':
-            #sms('prayer line.')
+            sms('prayer line.')
             with response.dial() as d:
                 d.addConference('conference-1', muted=True)
         if digit_pressed == '2':
-            #sms('schedule.')
+            sms('schedule.')
             response.say(S_schedule_S_focus, voice=v, action='/response/main_menu')
         if digit_pressed == '3':
-            #sms('directions.')
+            sms('directions.')
             response.say(M_directions, voice=v) #action='/response/main_menu'
             response.pause(length="2")
             response.say(M_info, voice=v) #action='/response/main_menu'
         if digit_pressed == '4':
-            #sms('nothing (4).')
+            sms('nothing (4).')
             response.pause(length='1')
         
         if digit_pressed == '5':
-            #sms('Spanish version.')
+            sms('Spanish version.')
             response.say(Espanol_G, voice='alice', language='es-MX')
 
         if digit_pressed == '7':
-            #sms('host prompt.')
+            sms('host prompt.')
             with response.gather(numDigits=4, action='/response/conference_speaker') as g:
                 g.say(P_coord, voice=v)
 

@@ -15,7 +15,7 @@ PLIVO_TOKEN = 'NGFhNjJlZTJhNTY3NjUzZTAzZjE0OTkzYWQ2ZTUz'
 PLIVO_SONG = "https://s3.amazonaws.com/plivocloud/music.mp3"
 
 # Voice used for speaking. MAN or WOMAN
-VOICE='alice'
+VOICE='WOMAN'
 
 # This is the message that Plivo reads when the caller dials in
 GREETING = greetings.welcome_greeting

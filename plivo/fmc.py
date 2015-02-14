@@ -54,6 +54,7 @@ CONFERENCE_UNMUTE_SEQUENCE = '9'
 
 app = Flask(__name__)
 
+"""
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -99,6 +100,7 @@ logging.config.dictConfig({
         },
     }
 })
+"""
 
 logger = logging.getLogger(__name__)
 recordings = logging.getLogger('recordings')
@@ -279,7 +281,7 @@ def conference_callback():
 #  (e.g. sending the caller back to the main menu, maybe telling them that there was an error)
 @app.route('/response/error_handler/', methods=['POST'])
 def error_handler():
-    logger.error('Pilvo error: %s , %s' % (request.values, request.data))
+    app.logger.error('Pilvo error: %s , %s' % (request.values, request.data))
     print 'Pilvo error: %s , %s' % (request.values, request.data)
 
     response = plivoxml.Response()

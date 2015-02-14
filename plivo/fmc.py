@@ -93,7 +93,7 @@ logging.config.dictConfig({
             'level': 'INFO',
             'propagate': True,
         },
-        'root': {
+        '': {
             'handlers': ['logfile', 'console'],
             'level': 'INFO',
             'propagate': True
@@ -281,11 +281,15 @@ def conference_callback():
 #  (e.g. sending the caller back to the main menu, maybe telling them that there was an error)
 @app.route('/response/error_handler/', methods=['POST'])
 def error_handler():
+<<<<<<< HEAD
     app.logger.error('Pilvo error: %s , %s' % (request.values, request.data))
     print 'Pilvo error: %s , %s' % (request.values, request.data)
+=======
+    logger.error('Plivo error: %s , %s' % (request.values, request.data))
+>>>>>>> 8808b0590ac08e31a7003c2a3e1cf8b962d8ff69
 
     response = plivoxml.Response()
-    response.addRedirect(url_for('ivr', _external=True))
+    response.addRedirect(url_for('main_menu', _external=True))
 
     return Response(str(response), mimetype='text/xml')
 

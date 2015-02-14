@@ -8,7 +8,6 @@ import plivoxml
 import settings, greetings
 
 
-
 # This file will be played when a caller presses 2.
 PLIVO_SONG = "https://s3.amazonaws.com/plivocloud/music.mp3"
 
@@ -40,21 +39,21 @@ WRONG_INPUT_MESSAGE = greetings.WRONG_INPUT_MESSAGE
 CONFERENCE_NAME = "Prayer_Line_01" #Inster date/time stamp ????
 
 # List of caller id's to notify admin when they join the conference as a speaker
-NOTIFY_ADMIN = ['16177721818','16178070291','13392366863']
+NOTIFY_ADMIN = settings.NOTIFY_ADMIN
 
 # Numbers used for sending SMS notification messages
 SMS_NOTIFICATION_NUMBER = settings.to_number
 
 # NOTE: source can't be the same as the number above (or any number that we send the messages to)
 SMS_SOURCE_NUMBER = settings.from_number
-SMS_NOTIFICATION_TEMPLATE = 'A new spaker has joined the conference. Caller id: %s.'
+SMS_NOTIFICATION_TEMPLATE = 'A new speaker has joined the conference. Caller id: %s.'
 
 SPEAKER_PIN = settings.pin_number
-CONFERENCE_UNMUTE_SEQUENCE = '9'
+CONFERENCE_UNMUTE_SEQUENCE = settings.CONFERENCE_UNMUTE_SEQUENCE
 
 app = Flask(__name__)
 
-"""
+
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -71,36 +70,18 @@ logging.config.dictConfig({
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
-            'formatter': 'verbose'
-        },
-        'recordings_file': {
-            'level': 'INFO',
-            'filename': 'recordings.log',
-            'class': 'logging.FileHandler',
             'formatter': 'recording'
         },
-        'logfile': {
-            'level': 'DEBUG',
-            'filename': 'debug.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'verbose'
-        }
     },
-
     'loggers': {
-        'recordings': {
-            'handlers': ['recordings_file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
         '': {
-            'handlers': ['logfile', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True
         },
     }
 })
-"""
+
 
 logger = logging.getLogger(__name__)
 recordings = logging.getLogger('recordings')
@@ -117,7 +98,12 @@ def main_menu():
                                        retries=1)
 
         g.addSpeak(GREETING)
+        response.addWait(length="10")
         response.addSpeak(NO_INPUT_MESSAGE)
+        response.addWait(length="15")
+                    ###### Does not work at this location???
+        #notify_admin(request.form.get('From'))
+
     elif request.method == 'POST':
         digit = request.form.get('Digits')
 
@@ -129,24 +115,22 @@ def main_menu():
                 record='true'
             )
         if digit == '2':
-            #sms('schedule.')
             response.addSpeak(SCHEDULE)#, voice=VOICE)
             response.addRedirect(url_for('main_menu', _external=True), method='GET')
         if digit == '3':
-            #sms('directions.')
             response.addSpeak(LOCATION)#, voice=VOICE)
             # NOTE: plivo does not seem to support adding a pause. What you can do is playing
             #  an empty/muted sound file of the desired length
             response.addSpeak("For more information, including directions, \
                 please visit fellowship mission church.org")#, voice=VOICE)
             response.addRedirect(url_for('main_menu', _external=True), method='GET')
+        """    
         if digit == '4':
-            #sms('nothing (4).')
-            pass
+            #sss
 
         if digit == '5':
-            #sms('spanish version.')
             response.addSpeak("...", voice=VOICE, language='es-MX')
+        """
 
         if digit == '7':
             response.addRedirect(url_for('conference_speaker', _external=True), method='GET')
@@ -194,9 +178,10 @@ def conference_listener_wait():
     return Response(str(response), mimetype='text/xml')
 
 def add_conference_pin_request(response, header_text):
-    g = response.addGetDigits(numDigits=4, action=url_for('conference_speaker', _external=True))
-    g.addSpeak('%s Please enter the code to host the conference.' % header_text,voice=VOICE) ##VOICE variable
-
+    g = response.addGetDigits(numDigits=4, action=url_for('conference_speaker', _external=True),timeout=20)
+    g.addSpeak('%s Please enter the code to host the conference.' % header_text,voice=VOICE)
+    response.addWait(length="10")
+    #####################g.addSpeak('%s Please enter the code to host the conference.' % header_text,voice=VOICE)
     return response
 
 
@@ -229,7 +214,7 @@ def conference_speaker():
             #     CONFERENCE_NAME, startConferenceOnEnter='true', muted='false', stayAlone='true',
             #     record='true', callbackUrl=url_for('conference_callback'), callbackMethod='POST'
             # )
-
+                    ######   ********UNMUTE MAY CAUSE TIMEOUT
             response.addConference(
                 CONFERENCE_NAME, startConferenceOnEnter='true', muted='false', stayAlone='true',
                 record='true', callbackUrl=url_for('conference_callback', _external=True),
@@ -265,7 +250,7 @@ def conference_callback():
         recordings.info('Conference recording has finished. Recording url: %s' % record_file)
     elif action == 'digits':
         conference_name = values.get('ConferenceName')
-        plivo_api = plivo.RestAPI(PLIVO_AUTH_ID, PLIVO_TOKEN)
+        plivo_api = plivo.RestAPI(settings.PLIVO_AUTH_ID, settings.PLIVO_TOKEN)
         conference = plivo_api.Conference.get(conference_name=conference_name)
 
         # TODO: this should be run in a background/worker thread, because it can cause a timeout
@@ -285,10 +270,10 @@ def error_handler():
     app.logger.error('Pilvo error: %s , %s' % (request.values, request.data))
     print 'Pilvo error: %s , %s' % (request.values, request.data)
 
-
+    response.addWait(length="7")
     response = plivoxml.Response()
     response.addRedirect(url_for('main_menu', _external=True))
-
+    response.addWait(length="7")
     return Response(str(response), mimetype='text/xml')
 
 

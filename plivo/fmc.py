@@ -112,7 +112,7 @@ def main_menu():
             response.addConference(
                 CONFERENCE_NAME, waitSound=url_for('conference_listener_wait',_external=True),
                 startConferenceOnEnter='false', muted='true', stayAlone='false',
-                record='true'
+                record='true', beep='',relayDTMF='false'
             )
             notify_admin(request.form.get('From'))
         if digit == '2':
@@ -219,7 +219,7 @@ def conference_speaker():
             response.addConference(
                 CONFERENCE_NAME, startConferenceOnEnter='true', muted='false', stayAlone='true',
                 record='true', callbackUrl=url_for('conference_callback', _external=True),
-                digitsMatch=CONFERENCE_UNMUTE_SEQUENCE, callbackMethod='POST'
+                digitsMatch=CONFERENCE_UNMUTE_SEQUENCE, callbackMethod='POST',relayDTMF='false'
             )
             notify_admin(request.form.get('From'))
         else:

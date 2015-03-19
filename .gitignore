@@ -63,12 +63,12 @@ plivo/settings.py
 dict.py
 greetings.txt
 settings.py
-Procfile
+#Procfile
 
 *.pyc
 plivo/settings.py
 plivo/dict.py
 plivo/greetings.txt
 plivo/settings.py
-plivo/Procfile
+#plivo/Procfile
 
